@@ -1134,6 +1134,7 @@ function PremiumPlanCard({
 
         <ul className="space-y-3.5 mb-9">
           <FeatureItem text={`${duration} Ideal Breakfast Recipes`} />
+          <FeatureItem text={`${duration} Ideal Dinner Recipes`} />
           <FeatureItem text="Personal Coach" />
           <FeatureItem text="24×7 WhatsApp Support" />
           <FeatureItem text="Weekly Tracking & Detailed Progress Report" />
