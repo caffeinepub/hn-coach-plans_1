@@ -88,6 +88,7 @@ interface FormErrors {
   email?: string;
   whatsappNo?: string;
   goal?: string;
+  invitedBy?: string;
 }
 
 /* ─── Date helpers ──────────────────────────────────────────────────────── */
@@ -298,6 +299,7 @@ function IntakeFormModal({
       e.deliveryAddress = "Delivery address is required";
     if (!form.pincode.trim()) e.pincode = "Pincode is required";
     if (!form.whatsappNo.trim()) e.whatsappNo = "WhatsApp number is required";
+    if (!form.invitedBy.trim()) e.invitedBy = "Who invited you can't be blank";
     if (!form.goal) e.goal = "Please select a goal";
     return e;
   }
@@ -591,7 +593,11 @@ function IntakeFormModal({
             </FormField>
 
             {/* Invited By */}
-            <FormField label="Who Invited You?" required={false}>
+            <FormField
+              label="Who Invited You?"
+              required
+              error={errors.invitedBy}
+            >
               <Input
                 data-ocid="form.invited_by.input"
                 type="text"
@@ -606,6 +612,9 @@ function IntakeFormModal({
                   ...inputStyle,
                   opacity: urlRef ? 0.65 : 1,
                   cursor: urlRef ? "not-allowed" : "text",
+                  borderColor: errors.invitedBy
+                    ? "oklch(0.65 0.22 25)"
+                    : undefined,
                 }}
               />
               {urlRef && (
