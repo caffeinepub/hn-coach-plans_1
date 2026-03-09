@@ -1033,8 +1033,8 @@ function RegularPlanCard({
           style={{ height: "1px", background: "oklch(0.72 0.19 45 / 0.12)" }}
         />
 
-        <ul className="space-y-3.5 mb-9">
-          <FeatureItem text={`${duration} Ideal Breakfast Recipes`} />
+        <ul className="space-y-3.5 mb-6">
+          <FeatureItem text={`${duration} Ideal Breakfast`} />
           <FeatureItem text="Personal Coach" />
           <FeatureItem text="WhatsApp Support" />
           <FeatureItem text="Weekly Tracking & Progress Report" />
@@ -1047,6 +1047,34 @@ function RegularPlanCard({
           <FeatureItem text="Business Opportunity on Achieving Ideal Weight" />
           <FeatureItem text="10% Off Coupon for a Friend" />
         </ul>
+
+        {duration === 20 && (
+          <div
+            className="mb-7 flex items-center gap-3 px-4 py-3 rounded-xl"
+            style={{
+              background: "oklch(0.55 0.18 145 / 0.12)",
+              border: "1.5px solid oklch(0.65 0.18 145 / 0.55)",
+            }}
+            data-ocid="pricing.regular.moneyback.panel"
+          >
+            <span className="text-xl flex-shrink-0">🛡️</span>
+            <div>
+              <p
+                className="font-display text-[0.75rem] font-black tracking-[0.1em] uppercase leading-none mb-0.5"
+                style={{ color: "oklch(0.72 0.18 145)" }}
+              >
+                30-Day Money Back Guarantee
+              </p>
+              <p
+                className="font-sans text-[0.72rem] leading-snug"
+                style={{ color: "oklch(0.65 0.08 145)" }}
+              >
+                Not satisfied? Get a full refund within 30 days — no questions
+                asked.
+              </p>
+            </div>
+          </div>
+        )}
 
         <CtaButton
           ocid="pricing.regular.button"
@@ -1132,9 +1160,9 @@ function PremiumPlanCard({
           style={{ height: "1px", background: "oklch(0.72 0.19 45 / 0.2)" }}
         />
 
-        <ul className="space-y-3.5 mb-9">
-          <FeatureItem text={`${duration} Ideal Breakfast Recipes`} />
-          <FeatureItem text={`${duration} Ideal Dinner Recipes`} />
+        <ul className="space-y-3.5 mb-6">
+          <FeatureItem text={`${duration} Ideal Breakfast`} />
+          <FeatureItem text={`${duration} Ideal Dinner`} />
           <FeatureItem text="Personal Coach" />
           <FeatureItem text="24×7 WhatsApp Support" />
           <FeatureItem text="Weekly Tracking & Detailed Progress Report" />
@@ -1148,6 +1176,34 @@ function PremiumPlanCard({
           <FeatureItem text="Business Opportunity on Achieving Ideal Weight" />
           <FeatureItem text="20% Off Coupon for a Friend" />
         </ul>
+
+        {duration === 20 && (
+          <div
+            className="mb-7 flex items-center gap-3 px-4 py-3 rounded-xl"
+            style={{
+              background: "oklch(0.55 0.18 145 / 0.12)",
+              border: "1.5px solid oklch(0.65 0.18 145 / 0.55)",
+            }}
+            data-ocid="pricing.premium.moneyback.panel"
+          >
+            <span className="text-xl flex-shrink-0">🛡️</span>
+            <div>
+              <p
+                className="font-display text-[0.75rem] font-black tracking-[0.1em] uppercase leading-none mb-0.5"
+                style={{ color: "oklch(0.72 0.18 145)" }}
+              >
+                30-Day Money Back Guarantee
+              </p>
+              <p
+                className="font-sans text-[0.72rem] leading-snug"
+                style={{ color: "oklch(0.65 0.08 145)" }}
+              >
+                Not satisfied? Get a full refund within 30 days — no questions
+                asked.
+              </p>
+            </div>
+          </div>
+        )}
 
         <CtaButton
           ocid="pricing.premium.button"
@@ -2699,20 +2755,6 @@ export default function App() {
             it to the person who sent you the link.
           </p>
         </div>
-
-        <p className="font-sans text-xs" style={{ color: "oklch(0.38 0 0)" }}>
-          © {new Date().getFullYear()}.{" "}
-          <a
-            href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(
-              typeof window !== "undefined" ? window.location.hostname : "",
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline underline-offset-2 transition-colors"
-          >
-            Built with ♥ using caffeine.ai
-          </a>
-        </p>
       </footer>
 
       {/* Intake Form Modal */}
