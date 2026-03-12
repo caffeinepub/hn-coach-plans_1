@@ -3089,6 +3089,9 @@ export default function App() {
   const [modalOpen, setModalOpen] = useState(false);
   const [activePlanName, setActivePlanName] = useState("");
   const [activePlanPrice, setActivePlanPrice] = useState(0);
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminPasswordError, setAdminPasswordError] = useState(false);
 
   function navigate(view: AppView) {
     setCurrentView(view);
@@ -3176,7 +3179,92 @@ export default function App() {
           </motion.div>
         )}
 
-        {currentView === "admin" && (
+        {currentView === "admin" && !adminUnlocked && (
+          <motion.div
+            key="admin-gate"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="flex-1 flex items-center justify-center px-4 py-16"
+          >
+            <div
+              className="w-full max-w-sm rounded-2xl p-8 flex flex-col gap-5"
+              style={{
+                background: "oklch(0.13 0.008 285)",
+                border: "1px solid oklch(0.22 0.008 285)",
+              }}
+            >
+              <div className="text-center mb-2">
+                <h1
+                  className="font-display font-black text-2xl"
+                  style={{ color: "oklch(0.97 0 0)" }}
+                >
+                  Admin Panel
+                </h1>
+                <p
+                  className="text-sm mt-1"
+                  style={{ color: "oklch(0.55 0.008 285)" }}
+                >
+                  Enter password to continue
+                </p>
+              </div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (adminPassword === "hncoach2024") {
+                    setAdminUnlocked(true);
+                    setAdminPasswordError(false);
+                  } else {
+                    setAdminPasswordError(true);
+                  }
+                }}
+                className="flex flex-col gap-3"
+              >
+                <input
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => {
+                    setAdminPassword(e.target.value);
+                    setAdminPasswordError(false);
+                  }}
+                  placeholder="Password"
+                  data-ocid="admin.password.input"
+                  className="w-full rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 transition-all"
+                  style={{
+                    background: "oklch(0.18 0.008 285)",
+                    border: adminPasswordError
+                      ? "1px solid oklch(0.65 0.2 30)"
+                      : "1px solid oklch(0.28 0.008 285)",
+                    color: "oklch(0.97 0 0)",
+                  }}
+                />
+                {adminPasswordError && (
+                  <p
+                    data-ocid="admin.password.error_state"
+                    className="text-sm text-center"
+                    style={{ color: "oklch(0.65 0.2 30)" }}
+                  >
+                    Incorrect password
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  data-ocid="admin.password.submit_button"
+                  className="w-full rounded-xl py-3 font-display font-bold text-sm transition-all hover:opacity-90 active:scale-95"
+                  style={{
+                    background: "oklch(0.72 0.19 45)",
+                    color: "oklch(0.10 0 0)",
+                  }}
+                >
+                  Login
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        )}
+
+        {currentView === "admin" && adminUnlocked && (
           <motion.div
             key="admin"
             initial={{ opacity: 0 }}
