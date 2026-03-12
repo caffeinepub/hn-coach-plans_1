@@ -35,9 +35,12 @@ import {
   Loader2,
   Lock,
   PenLine,
+  Plus,
   RefreshCw,
   Star,
+  Tag,
   Target,
+  Trash2,
   UserPlus,
   Users,
   X,
@@ -288,6 +291,35 @@ function IntakeFormModal({
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponStatus, setCouponStatus] = useState<
+    "idle" | "valid" | "invalid" | "checking"
+  >("idle");
+
+  async function applyCoupon() {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) return;
+    setCouponStatus("checking");
+    try {
+      const result = await actor?.validateCoupon(code);
+      if (result !== null && result !== undefined) {
+        setCouponDiscount(Number(result));
+        setCouponStatus("valid");
+      } else {
+        setCouponDiscount(0);
+        setCouponStatus("invalid");
+      }
+    } catch {
+      setCouponDiscount(0);
+      setCouponStatus("invalid");
+    }
+  }
+
+  const discountedPrice =
+    couponDiscount > 0
+      ? Math.round(planPrice * (1 - couponDiscount / 100))
+      : planPrice;
 
   function validate(): FormErrors {
     const e: FormErrors = {};
@@ -317,7 +349,7 @@ function IntakeFormModal({
 
     const options: Record<string, unknown> = {
       key: RAZORPAY_KEY,
-      amount: planPrice * 100, // paise
+      amount: discountedPrice * 100, // paise
       currency: "INR",
       name: "HN Coach",
       description: planName,
@@ -364,6 +396,10 @@ function IntakeFormModal({
           `Plan: ${planName}`,
         ];
         if (form.invitedBy) messageParts.push(`Invited By: ${form.invitedBy}`);
+        if (couponDiscount > 0)
+          messageParts.push(
+            `Coupon Applied: ${couponCode.trim().toUpperCase()} (${couponDiscount}% off) — Paid: ₹${discountedPrice}`,
+          );
         messageParts.push("", "Please confirm my membership activation!");
         const message = messageParts.join("\n");
 
@@ -405,6 +441,9 @@ function IntakeFormModal({
     });
     setErrors({});
     setSubmitted(false);
+    setCouponCode("");
+    setCouponDiscount(0);
+    setCouponStatus("idle");
     onClose();
   }
 
@@ -626,6 +665,105 @@ function IntakeFormModal({
                 </p>
               )}
             </FormField>
+
+            {/* Coupon Code */}
+            <FormField label="Coupon Code" required={false} error={undefined}>
+              <div className="flex gap-2">
+                <Input
+                  data-ocid="form.coupon.input"
+                  type="text"
+                  placeholder="e.g. SAVE10"
+                  value={couponCode}
+                  onChange={(e) => {
+                    setCouponCode(e.target.value.toUpperCase());
+                    setCouponStatus("idle");
+                    setCouponDiscount(0);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      applyCoupon();
+                    }
+                  }}
+                  className="form-input flex-1"
+                  style={{
+                    ...inputStyle,
+                    borderColor:
+                      couponStatus === "valid"
+                        ? "oklch(0.70 0.18 145)"
+                        : couponStatus === "invalid"
+                          ? "oklch(0.65 0.22 25)"
+                          : undefined,
+                  }}
+                />
+                <button
+                  type="button"
+                  data-ocid="form.coupon.button"
+                  onClick={applyCoupon}
+                  disabled={couponStatus === "checking" || !couponCode.trim()}
+                  className="px-4 py-2 rounded-xl font-sans text-sm font-semibold transition-all duration-150 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap"
+                  style={{
+                    background: "oklch(0.72 0.19 45 / 0.15)",
+                    border: "1px solid oklch(0.72 0.19 45 / 0.5)",
+                    color: "oklch(0.72 0.19 45)",
+                  }}
+                >
+                  {couponStatus === "checking" ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    "Apply"
+                  )}
+                </button>
+              </div>
+              {couponStatus === "valid" && (
+                <p
+                  className="font-sans text-xs mt-1.5 font-semibold"
+                  style={{ color: "oklch(0.70 0.18 145)" }}
+                >
+                  ✓ Coupon applied! {couponDiscount}% off
+                </p>
+              )}
+              {couponStatus === "invalid" && (
+                <p
+                  className="font-sans text-xs mt-1.5"
+                  style={{ color: "oklch(0.65 0.22 25)" }}
+                >
+                  ✗ Invalid coupon code
+                </p>
+              )}
+            </FormField>
+
+            {/* Price summary if coupon applied */}
+            {couponStatus === "valid" && couponDiscount > 0 && (
+              <div
+                className="rounded-xl px-4 py-3 flex items-center justify-between"
+                style={{
+                  background: "oklch(0.70 0.18 145 / 0.08)",
+                  border: "1px solid oklch(0.70 0.18 145 / 0.3)",
+                }}
+              >
+                <span
+                  className="font-sans text-sm"
+                  style={{ color: "oklch(0.70 0.18 145)" }}
+                >
+                  Amount to pay
+                </span>
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className="font-sans text-sm line-through"
+                    style={{ color: "oklch(0.45 0 0)" }}
+                  >
+                    ₹{planPrice.toLocaleString("en-IN")}
+                  </span>
+                  <span
+                    className="font-display text-lg font-black"
+                    style={{ color: "oklch(0.70 0.18 145)" }}
+                  >
+                    ₹{discountedPrice.toLocaleString("en-IN")}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Goal */}
             <div className="space-y-2">
@@ -2409,7 +2547,338 @@ function AdminPanel({ actor }: { actor: backendInterface | null }) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ── Coupon Codes Section ────────────────────────────────────────── */}
+      <CouponSection actor={actor} />
     </main>
+  );
+}
+
+/* ─── Coupon Section ─────────────────────────────────────────────────────── */
+
+interface Coupon {
+  code: string;
+  createdAt: bigint;
+  discountPct: bigint;
+}
+
+function CouponSection({ actor }: { actor: backendInterface | null }) {
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [loadingCoupons, setLoadingCoupons] = useState(false);
+  const [newCode, setNewCode] = useState("");
+  const [newDiscount, setNewDiscount] = useState("");
+  const [addError, setAddError] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [deletingCode, setDeletingCode] = useState<string | null>(null);
+
+  const adminInputStyle: React.CSSProperties = {
+    background: "oklch(0.17 0.010 285)",
+    border: "1px solid oklch(0.28 0.010 285)",
+    color: "oklch(0.95 0 0)",
+    fontSize: "0.85rem",
+  };
+
+  const loadCoupons = useCallback(async () => {
+    if (!actor) return;
+    setLoadingCoupons(true);
+    try {
+      const all = await actor.getAllCoupons();
+      setCoupons(all);
+    } catch {
+      // silent
+    } finally {
+      setLoadingCoupons(false);
+    }
+  }, [actor]);
+
+  useEffect(() => {
+    loadCoupons();
+  }, [loadCoupons]);
+
+  async function handleAddCoupon(e: React.FormEvent) {
+    e.preventDefault();
+    setAddError("");
+    const code = newCode.trim().toUpperCase();
+    const pct = Number(newDiscount);
+    if (!code) {
+      setAddError("Code is required");
+      return;
+    }
+    if (!pct || pct < 1 || pct > 100) {
+      setAddError("Discount must be 1–100%");
+      return;
+    }
+    setAdding(true);
+    try {
+      await actor?.addCoupon(code, BigInt(pct));
+      setNewCode("");
+      setNewDiscount("");
+      await loadCoupons();
+    } catch {
+      setAddError("Failed to add coupon");
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  async function handleDelete(code: string) {
+    setDeletingCode(code);
+    try {
+      await actor?.deleteCoupon(code);
+      await loadCoupons();
+    } catch {
+      // silent
+    } finally {
+      setDeletingCode(null);
+    }
+  }
+
+  return (
+    <section className="mt-12" data-ocid="admin.coupons.section">
+      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <div>
+          <div className="inline-flex items-center gap-2 mb-1">
+            <span
+              className="inline-block w-1.5 h-1.5 rounded-full"
+              style={{ background: "oklch(0.72 0.19 45)" }}
+            />
+            <span
+              className="font-sans text-[0.65rem] font-bold tracking-[0.22em] uppercase"
+              style={{ color: "oklch(0.72 0.19 45)" }}
+            >
+              Discounts
+            </span>
+          </div>
+          <h2 className="font-display text-xl font-black text-foreground tracking-tight">
+            Coupon Codes
+          </h2>
+          <p
+            className="font-sans text-sm mt-0.5"
+            style={{ color: "oklch(0.55 0 0)" }}
+          >
+            {coupons.length} active{" "}
+            {coupons.length === 1 ? "coupon" : "coupons"}
+          </p>
+        </div>
+        <button
+          type="button"
+          data-ocid="admin.coupons.refresh.button"
+          onClick={loadCoupons}
+          disabled={loadingCoupons}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl font-sans text-sm font-semibold transition-all duration-150 hover:scale-105 active:scale-95 disabled:opacity-50"
+          style={{
+            background: "oklch(0.18 0.010 285)",
+            border: "1px solid oklch(0.28 0.010 285)",
+            color: "oklch(0.65 0 0)",
+          }}
+        >
+          <RefreshCw
+            size={14}
+            className={loadingCoupons ? "animate-spin" : ""}
+          />
+          Refresh
+        </button>
+      </div>
+
+      {/* Add coupon form */}
+      <form
+        onSubmit={handleAddCoupon}
+        className="rounded-2xl p-5 mb-5 flex flex-col sm:flex-row gap-3 items-end"
+        style={{
+          background: "oklch(0.12 0.010 285)",
+          border: "1px solid oklch(0.25 0.008 285)",
+        }}
+      >
+        <div className="flex-1 space-y-1.5">
+          <Label
+            className="font-sans text-xs font-semibold uppercase tracking-wider"
+            style={{ color: "oklch(0.55 0 0)" }}
+          >
+            Coupon Code
+          </Label>
+          <Input
+            data-ocid="admin.coupon.code.input"
+            type="text"
+            placeholder="e.g. SAVE20"
+            value={newCode}
+            onChange={(e) => {
+              setNewCode(e.target.value.toUpperCase());
+              setAddError("");
+            }}
+            style={adminInputStyle}
+          />
+        </div>
+        <div className="w-32 space-y-1.5">
+          <Label
+            className="font-sans text-xs font-semibold uppercase tracking-wider"
+            style={{ color: "oklch(0.55 0 0)" }}
+          >
+            Discount %
+          </Label>
+          <Input
+            data-ocid="admin.coupon.discount.input"
+            type="number"
+            min="1"
+            max="100"
+            placeholder="e.g. 15"
+            value={newDiscount}
+            onChange={(e) => {
+              setNewDiscount(e.target.value);
+              setAddError("");
+            }}
+            style={adminInputStyle}
+          />
+        </div>
+        <button
+          type="submit"
+          data-ocid="admin.coupon.add.button"
+          disabled={adding}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-display text-sm font-black tracking-[0.08em] uppercase transition-all duration-150 hover:scale-105 active:scale-95 disabled:opacity-60 disabled:pointer-events-none whitespace-nowrap"
+          style={{
+            background: "oklch(0.72 0.19 45)",
+            color: "oklch(0.10 0 0)",
+            boxShadow: "0 4px 16px oklch(0.72 0.19 45 / 0.35)",
+          }}
+        >
+          {adding ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <Plus size={14} />
+          )}
+          Add Coupon
+        </button>
+        {addError && (
+          <p
+            className="font-sans text-xs sm:absolute sm:mt-0 mt-1"
+            style={{ color: "oklch(0.65 0.22 25)" }}
+          >
+            {addError}
+          </p>
+        )}
+      </form>
+
+      {/* Coupon list */}
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{
+          border: "1px solid oklch(0.25 0.008 285)",
+          background: "oklch(0.12 0.010 285)",
+        }}
+      >
+        {loadingCoupons ? (
+          <div
+            data-ocid="admin.coupons.loading_state"
+            className="flex items-center justify-center py-10 gap-3"
+          >
+            <Loader2
+              size={18}
+              className="animate-spin"
+              style={{ color: "oklch(0.72 0.19 45)" }}
+            />
+            <span
+              className="font-sans text-sm"
+              style={{ color: "oklch(0.55 0 0)" }}
+            >
+              Loading coupons...
+            </span>
+          </div>
+        ) : coupons.length === 0 ? (
+          <div
+            data-ocid="admin.coupons.empty_state"
+            className="flex flex-col items-center justify-center py-10 gap-2 text-center"
+          >
+            <Tag size={24} style={{ color: "oklch(0.35 0 0)" }} />
+            <p className="font-display font-black text-sm text-foreground">
+              No coupons yet
+            </p>
+            <p
+              className="font-sans text-xs"
+              style={{ color: "oklch(0.45 0 0)" }}
+            >
+              Add your first coupon code above
+            </p>
+          </div>
+        ) : (
+          <Table data-ocid="admin.coupons.table">
+            <TableHeader>
+              <TableRow
+                style={{
+                  borderBottom: "1px solid oklch(0.22 0.008 285)",
+                  background: "oklch(0.15 0.010 285)",
+                }}
+              >
+                {["Code", "Discount", "Created", ""].map((h) => (
+                  <TableHead
+                    key={h}
+                    className="font-sans text-[0.65rem] font-bold uppercase tracking-wider"
+                    style={{ color: "oklch(0.55 0 0)" }}
+                  >
+                    {h}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {coupons.map((c, idx) => (
+                <TableRow
+                  key={c.code}
+                  data-ocid={`admin.coupons.item.${idx + 1}`}
+                  style={{ borderBottom: "1px solid oklch(0.18 0.008 285)" }}
+                  className="hover:bg-[oklch(0.15_0.010_285/0.5)] transition-colors"
+                >
+                  <TableCell
+                    className="font-mono text-sm font-bold"
+                    style={{ color: "oklch(0.72 0.19 45)" }}
+                  >
+                    {c.code}
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-full font-sans text-xs font-bold"
+                      style={{
+                        background: "oklch(0.72 0.19 45 / 0.15)",
+                        color: "oklch(0.72 0.19 45)",
+                      }}
+                    >
+                      {String(c.discountPct)}% OFF
+                    </span>
+                  </TableCell>
+                  <TableCell
+                    className="font-sans text-xs"
+                    style={{ color: "oklch(0.55 0 0)" }}
+                  >
+                    {new Date(
+                      Number(c.createdAt / 1_000_000n),
+                    ).toLocaleDateString("en-IN")}
+                  </TableCell>
+                  <TableCell>
+                    <button
+                      type="button"
+                      data-ocid={`admin.coupons.delete_button.${idx + 1}`}
+                      onClick={() => handleDelete(c.code)}
+                      disabled={deletingCode === c.code}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-sans text-xs font-semibold transition-all duration-150 hover:scale-105 active:scale-95 disabled:opacity-50"
+                      style={{
+                        background: "oklch(0.65 0.22 25 / 0.12)",
+                        border: "1px solid oklch(0.65 0.22 25 / 0.35)",
+                        color: "oklch(0.65 0.22 25)",
+                      }}
+                    >
+                      {deletingCode === c.code ? (
+                        <Loader2 size={11} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={11} />
+                      )}
+                      Delete
+                    </button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+    </section>
   );
 }
 

@@ -19,7 +19,14 @@ actor {
     createdAt : Int;
   };
 
+  type Coupon = {
+    code : Text;
+    discountPct : Nat;
+    createdAt : Int;
+  };
+
   let members = Map.empty<Text, Member>();
+  let coupons = Map.empty<Text, Coupon>();
 
   public shared ({ caller }) func registerMember(
     whatsappNo : Text,
@@ -106,5 +113,35 @@ actor {
         true;
       };
     };
+  };
+
+  // Coupon management
+
+  public shared ({ caller }) func addCoupon(code : Text, discountPct : Nat) : async Bool {
+    if (code == "" or discountPct == 0 or discountPct > 100) { return false };
+    let upperCode = code;
+    switch (coupons.get(upperCode)) {
+      case (?_) { false };
+      case (null) {
+        let coupon : Coupon = { code = upperCode; discountPct; createdAt = Time.now() };
+        coupons.add(upperCode, coupon);
+        true;
+      };
+    };
+  };
+
+  public query ({ caller }) func validateCoupon(code : Text) : async ?Nat {
+    switch (coupons.get(code)) {
+      case (?c) { ?c.discountPct };
+      case (null) { null };
+    };
+  };
+
+  public query ({ caller }) func getAllCoupons() : async [Coupon] {
+    coupons.values().toArray();
+  };
+
+  public shared ({ caller }) func deleteCoupon(code : Text) : async Bool {
+    coupons.containsKey(code);
   };
 };

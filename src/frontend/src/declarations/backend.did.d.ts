@@ -10,6 +10,11 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface Coupon {
+  'code' : string,
+  'createdAt' : bigint,
+  'discountPct' : bigint,
+}
 export interface Member {
   'age' : string,
   'weight' : string,
@@ -25,6 +30,9 @@ export interface Member {
   'startDate' : bigint,
 }
 export interface _SERVICE {
+  'addCoupon' : ActorMethod<[string, bigint], boolean>,
+  'deleteCoupon' : ActorMethod<[string], boolean>,
+  'getAllCoupons' : ActorMethod<[], Array<Coupon>>,
   'getAllMembers' : ActorMethod<[], Array<Member>>,
   'getMember' : ActorMethod<[string], [] | [Member]>,
   'getReferralCount' : ActorMethod<[string], bigint>,
@@ -59,6 +67,7 @@ export interface _SERVICE {
     ],
     boolean
   >,
+  'validateCoupon' : ActorMethod<[string], [] | [bigint]>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

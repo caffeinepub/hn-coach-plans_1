@@ -103,16 +103,67 @@ export interface Member {
     whatsappNo: string;
     startDate: bigint;
 }
+export interface Coupon {
+    code: string;
+    createdAt: bigint;
+    discountPct: bigint;
+}
 export interface backendInterface {
+    addCoupon(code: string, discountPct: bigint): Promise<boolean>;
+    deleteCoupon(code: string): Promise<boolean>;
+    getAllCoupons(): Promise<Array<Coupon>>;
     getAllMembers(): Promise<Array<Member>>;
     getMember(whatsappNo: string): Promise<Member | null>;
     getReferralCount(whatsappNo: string): Promise<bigint>;
     registerMember(whatsappNo: string, fullName: string, age: string, height: string, weight: string, city: string, goal: string, plan: string, startDate: bigint, endDate: bigint, referredBy: string): Promise<boolean>;
     updateMember(whatsappNo: string, fullName: string, age: string, height: string, weight: string, city: string, goal: string, plan: string, startDate: bigint, endDate: bigint): Promise<boolean>;
+    validateCoupon(code: string): Promise<bigint | null>;
 }
 import type { Member as _Member } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
+    async addCoupon(arg0: string, arg1: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addCoupon(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addCoupon(arg0, arg1);
+            return result;
+        }
+    }
+    async deleteCoupon(arg0: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteCoupon(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteCoupon(arg0);
+            return result;
+        }
+    }
+    async getAllCoupons(): Promise<Array<Coupon>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllCoupons();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllCoupons();
+            return result;
+        }
+    }
     async getAllMembers(): Promise<Array<Member>> {
         if (this.processError) {
             try {
@@ -183,8 +234,25 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async validateCoupon(arg0: string): Promise<bigint | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.validateCoupon(arg0);
+                return from_candid_opt_n2(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.validateCoupon(arg0);
+            return from_candid_opt_n2(this._uploadFile, this._downloadFile, result);
+        }
+    }
 }
 function from_candid_opt_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Member]): Member | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
     return value.length === 0 ? null : value[0];
 }
 export interface CreateActorOptions {

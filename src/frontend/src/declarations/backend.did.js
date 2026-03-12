@@ -8,6 +8,11 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const Coupon = IDL.Record({
+  'code' : IDL.Text,
+  'createdAt' : IDL.Int,
+  'discountPct' : IDL.Nat,
+});
 export const Member = IDL.Record({
   'age' : IDL.Text,
   'weight' : IDL.Text,
@@ -24,6 +29,9 @@ export const Member = IDL.Record({
 });
 
 export const idlService = IDL.Service({
+  'addCoupon' : IDL.Func([IDL.Text, IDL.Nat], [IDL.Bool], []),
+  'deleteCoupon' : IDL.Func([IDL.Text], [IDL.Bool], []),
+  'getAllCoupons' : IDL.Func([], [IDL.Vec(Coupon)], ['query']),
   'getAllMembers' : IDL.Func([], [IDL.Vec(Member)], ['query']),
   'getMember' : IDL.Func([IDL.Text], [IDL.Opt(Member)], ['query']),
   'getReferralCount' : IDL.Func([IDL.Text], [IDL.Nat], ['query']),
@@ -60,11 +68,17 @@ export const idlService = IDL.Service({
       [IDL.Bool],
       [],
     ),
+  'validateCoupon' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Nat)], ['query']),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const Coupon = IDL.Record({
+    'code' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'discountPct' : IDL.Nat,
+  });
   const Member = IDL.Record({
     'age' : IDL.Text,
     'weight' : IDL.Text,
@@ -81,6 +95,9 @@ export const idlFactory = ({ IDL }) => {
   });
   
   return IDL.Service({
+    'addCoupon' : IDL.Func([IDL.Text, IDL.Nat], [IDL.Bool], []),
+    'deleteCoupon' : IDL.Func([IDL.Text], [IDL.Bool], []),
+    'getAllCoupons' : IDL.Func([], [IDL.Vec(Coupon)], ['query']),
     'getAllMembers' : IDL.Func([], [IDL.Vec(Member)], ['query']),
     'getMember' : IDL.Func([IDL.Text], [IDL.Opt(Member)], ['query']),
     'getReferralCount' : IDL.Func([IDL.Text], [IDL.Nat], ['query']),
@@ -117,6 +134,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Bool],
         [],
       ),
+    'validateCoupon' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Nat)], ['query']),
   });
 };
 

@@ -21,10 +21,19 @@ export interface Member {
     whatsappNo: string;
     startDate: bigint;
 }
+export interface Coupon {
+    code: string;
+    createdAt: bigint;
+    discountPct: bigint;
+}
 export interface backendInterface {
+    addCoupon(code: string, discountPct: bigint): Promise<boolean>;
+    deleteCoupon(code: string): Promise<boolean>;
+    getAllCoupons(): Promise<Array<Coupon>>;
     getAllMembers(): Promise<Array<Member>>;
     getMember(whatsappNo: string): Promise<Member | null>;
     getReferralCount(whatsappNo: string): Promise<bigint>;
     registerMember(whatsappNo: string, fullName: string, age: string, height: string, weight: string, city: string, goal: string, plan: string, startDate: bigint, endDate: bigint, referredBy: string): Promise<boolean>;
     updateMember(whatsappNo: string, fullName: string, age: string, height: string, weight: string, city: string, goal: string, plan: string, startDate: bigint, endDate: bigint): Promise<boolean>;
+    validateCoupon(code: string): Promise<bigint | null>;
 }
