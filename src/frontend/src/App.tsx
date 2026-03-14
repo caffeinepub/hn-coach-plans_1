@@ -29,6 +29,7 @@ import { useActor } from "@/hooks/useActor";
 import {
   AlertCircle,
   Calendar,
+  ChevronLeft,
   ChevronRight,
   Clock,
   CreditCard,
@@ -2882,6 +2883,169 @@ function CouponSection({ actor }: { actor: backendInterface | null }) {
   );
 }
 
+/* ─── Transformation Slideshow ───────────────────────────────────────────── */
+
+const TRANSFORMATION_IMAGES = [
+  "/assets/uploads/IMG-20260314-WA0058-1.jpg",
+  "/assets/uploads/Picsart_25-07-05_13-20-14-288-2.jpg",
+  "/assets/uploads/Picsart_24-07-31_09-53-11-370-3.jpg",
+  "/assets/uploads/Picsart_25-06-25_14-25-29-230-4.jpg",
+  "/assets/uploads/Picsart_24-08-11_19-13-22-360-5.jpg",
+  "/assets/uploads/Picsart_25-06-30_23-42-41-329-6.jpg",
+  "/assets/uploads/Picsart_25-02-09_10-36-03-298-7.jpg",
+];
+
+function TransformationSlideshow() {
+  const [current, setCurrent] = useState(0);
+  const [hovered, setHovered] = useState(false);
+  const total = TRANSFORMATION_IMAGES.length;
+
+  const prev = () => setCurrent((c) => (c - 1 + total) % total);
+  const next = () => setCurrent((c) => (c + 1) % total);
+
+  useEffect(() => {
+    if (hovered) return;
+    const id = setInterval(() => {
+      setCurrent((c) => (c + 1) % total);
+    }, 3000);
+    return () => clearInterval(id);
+  }, [hovered, total]);
+
+  return (
+    <section
+      data-ocid="slideshow.section"
+      className="mt-16 w-full max-w-lg flex flex-col items-center gap-5"
+    >
+      {/* Heading */}
+      <div className="text-center">
+        <p
+          className="text-xs font-sans font-semibold tracking-widest uppercase mb-1"
+          style={{ color: "oklch(0.72 0.19 45)" }}
+        >
+          Our Members' Journey
+        </p>
+        <h2
+          className="font-display font-black text-2xl md:text-3xl mb-3"
+          style={{ color: "oklch(0.97 0 0)" }}
+        >
+          Real Transformations
+        </h2>
+        <div
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-display font-black text-sm md:text-base tracking-wide"
+          style={{
+            background: "oklch(0.72 0.19 45 / 0.15)",
+            border: "1.5px solid oklch(0.72 0.19 45 / 0.6)",
+            color: "oklch(0.72 0.19 45)",
+            boxShadow: "0 0 18px oklch(0.72 0.19 45 / 0.25)",
+          }}
+        >
+          🏆 Join 500+ Happy Members
+        </div>
+      </div>
+
+      {/* Slide container */}
+      <div
+        className="relative w-full rounded-2xl overflow-hidden"
+        style={{
+          maxWidth: 480,
+          background: "oklch(0.12 0.008 285)",
+          border: "1px solid oklch(0.72 0.19 45 / 0.30)",
+          boxShadow: "0 0 40px oklch(0.72 0.19 45 / 0.10)",
+        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        {/* Images with fade transition */}
+        <div className="relative w-full" style={{ minHeight: 320 }}>
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={current}
+              src={TRANSFORMATION_IMAGES[current]}
+              alt={`Transformation ${current + 1}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="w-full h-auto block"
+              style={{ display: "block" }}
+            />
+          </AnimatePresence>
+        </div>
+
+        {/* Prev arrow */}
+        <button
+          type="button"
+          data-ocid="slideshow.prev.button"
+          onClick={prev}
+          className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full transition-all hover:scale-110 active:scale-95"
+          style={{
+            background: "oklch(0.10 0 0 / 0.65)",
+            border: "1px solid oklch(0.72 0.19 45 / 0.40)",
+            color: "oklch(0.97 0 0)",
+            backdropFilter: "blur(4px)",
+          }}
+          aria-label="Previous image"
+        >
+          <ChevronLeft size={18} />
+        </button>
+
+        {/* Next arrow */}
+        <button
+          type="button"
+          data-ocid="slideshow.next.button"
+          onClick={next}
+          className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full transition-all hover:scale-110 active:scale-95"
+          style={{
+            background: "oklch(0.10 0 0 / 0.65)",
+            border: "1px solid oklch(0.72 0.19 45 / 0.40)",
+            color: "oklch(0.97 0 0)",
+            backdropFilter: "blur(4px)",
+          }}
+          aria-label="Next image"
+        >
+          <ChevronRight size={18} />
+        </button>
+
+        {/* Dot indicators */}
+        <div
+          className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 flex-wrap justify-center px-4"
+          style={{ maxWidth: "100%" }}
+        >
+          {TRANSFORMATION_IMAGES.map((img, i) => (
+            <button
+              key={img}
+              type="button"
+              onClick={() => setCurrent(i)}
+              className="rounded-full transition-all"
+              style={{
+                width: i === current ? 18 : 6,
+                height: 6,
+                background:
+                  i === current
+                    ? "oklch(0.72 0.19 45)"
+                    : "oklch(0.97 0 0 / 0.40)",
+              }}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Counter */}
+        <div
+          className="absolute top-3 right-3 text-xs font-sans font-semibold px-2.5 py-1 rounded-full"
+          style={{
+            background: "oklch(0.10 0 0 / 0.65)",
+            color: "oklch(0.97 0 0)",
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          {current + 1} / {total}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─── Pricing Page ───────────────────────────────────────────────────────── */
 
 function PricingPage({
@@ -2966,6 +3130,9 @@ function PricingPage({
           Choose your plan and start your transformation today
         </p>
       </motion.div>
+
+      {/* Transformation Slideshow */}
+      <TransformationSlideshow />
 
       {/* Toggle */}
       <motion.div
