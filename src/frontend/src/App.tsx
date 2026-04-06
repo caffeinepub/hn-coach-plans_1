@@ -67,7 +67,7 @@ type Goal =
   | "Belly Fat Loss"
   | "Increase Energy";
 
-type AppView = "pricing" | "track" | "admin";
+type AppView = "pricing" | "track" | "admin" | "form";
 
 interface FormData {
   fullName: string;
@@ -261,15 +261,13 @@ const PLAN_DAYS: Record<string, number> = {
   "Premium Plan - 60 Days": 60,
 };
 
-function IntakeFormModal({
-  open,
-  onClose,
+function RegistrationFormPage({
+  onBack,
   planName,
   planPrice,
   actor,
 }: {
-  open: boolean;
-  onClose: () => void;
+  onBack: () => void;
   planName: string;
   planPrice: number;
   actor: backendInterface | null;
@@ -332,7 +330,7 @@ function IntakeFormModal({
       e.deliveryAddress = "Delivery address is required";
     if (!form.pincode.trim()) e.pincode = "Pincode is required";
     if (!form.whatsappNo.trim()) e.whatsappNo = "WhatsApp number is required";
-    if (!form.invitedBy.trim()) e.invitedBy = "Who invited you can't be blank";
+    // invitedBy is auto-populated from URL ref, not required to be typed
     if (!form.goal) e.goal = "Please select a goal";
     return e;
   }
@@ -410,7 +408,7 @@ function IntakeFormModal({
           "noopener,noreferrer",
         );
         setSaving(false);
-        onClose();
+        onBack();
       },
     };
 
@@ -445,73 +443,147 @@ function IntakeFormModal({
     setCouponCode("");
     setCouponDiscount(0);
     setCouponStatus("idle");
-    onClose();
+    onBack();
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent
-        data-ocid="intake.modal"
-        className="max-w-lg w-full p-0 gap-0 border-0 overflow-hidden"
-        style={{
-          background: "oklch(0.12 0.010 285)",
-          border: "1px solid oklch(0.28 0.012 285)",
-          boxShadow:
-            "0 24px 80px oklch(0.05 0.008 285 / 0.95), 0 0 0 1px oklch(0.72 0.19 45 / 0.08)",
-        }}
+    <div
+      data-ocid="intake.modal"
+      className="min-h-screen bg-background flex flex-col"
+    >
+      {/* Background ambient shapes */}
+      <div
+        className="fixed inset-0 pointer-events-none overflow-hidden"
+        aria-hidden="true"
       >
-        {/* Ambient glow top */}
         <div
-          className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+          className="absolute -top-40 -right-40 w-[700px] h-[700px] rounded-full"
           style={{
             background:
-              "linear-gradient(90deg, transparent, oklch(0.72 0.19 45 / 0.5) 50%, transparent)",
+              "radial-gradient(circle, oklch(0.72 0.19 45 / 0.05) 0%, transparent 65%)",
           }}
-          aria-hidden="true"
         />
+        <div
+          className="absolute -bottom-60 -left-40 w-[600px] h-[600px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, oklch(0.72 0.19 45 / 0.035) 0%, transparent 65%)",
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(oklch(0.97 0 0 / 0.06) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+      </div>
 
-        {/* Header */}
-        <DialogHeader className="px-6 pt-6 pb-0">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-2 mb-3">
-                <span
-                  className="inline-block w-1.5 h-1.5 rounded-full"
-                  style={{ background: "oklch(0.72 0.19 45)" }}
-                />
-                <span
-                  className="font-sans text-[0.65rem] font-bold tracking-[0.22em] uppercase"
-                  style={{ color: "oklch(0.72 0.19 45)" }}
-                >
-                  {planName}
-                </span>
-              </div>
-              <DialogTitle className="font-display text-2xl font-black tracking-tight text-foreground leading-tight">
-                Almost there!{" "}
-                <span
-                  className="block"
-                  style={{ color: "oklch(0.72 0.19 45)" }}
-                >
-                  Tell us about yourself
-                </span>
-              </DialogTitle>
-              <p
-                className="font-sans text-sm mt-1.5"
-                style={{ color: "oklch(0.58 0 0)" }}
-              >
-                Fill in your details to proceed to payment.
-              </p>
-            </div>
+      {/* Page header */}
+      <div
+        className="relative flex-shrink-0 px-4 pt-6 pb-4 flex items-center gap-3"
+        style={{ borderBottom: "1px solid oklch(0.20 0.008 285)" }}
+      >
+        <button
+          type="button"
+          data-ocid="form.cancel_button"
+          onClick={handleClose}
+          className="flex items-center justify-center w-10 h-10 rounded-xl transition-all hover:scale-105 active:scale-95"
+          style={{
+            background: "oklch(0.17 0.010 285)",
+            border: "1px solid oklch(0.28 0.010 285)",
+            color: "oklch(0.70 0 0)",
+          }}
+          aria-label="Go back"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <div className="flex flex-col items-center flex-1 text-center">
+          <div className="inline-flex items-center gap-2 mb-1">
+            <span
+              className="inline-block w-1.5 h-1.5 rounded-full"
+              style={{ background: "oklch(0.72 0.19 45)" }}
+            />
+            <span
+              className="font-sans text-[0.65rem] font-bold tracking-[0.22em] uppercase"
+              style={{ color: "oklch(0.72 0.19 45)" }}
+            >
+              {planName}
+            </span>
           </div>
-        </DialogHeader>
+          <h1 className="font-display text-xl font-black tracking-tight text-foreground leading-tight">
+            Complete Your Registration
+          </h1>
+        </div>
+        <div className="w-10" />
+      </div>
 
-        {/* Scrollable form body */}
-        <ScrollArea className="max-h-[65vh] mt-5">
+      {/* Scrollable form content */}
+      <div className="relative flex-1 overflow-y-auto">
+        <div className="max-w-lg mx-auto px-4 py-8">
+          {/* Form header card */}
+          <div
+            className="mb-8 rounded-2xl p-6 text-center relative overflow-hidden"
+            style={{
+              background: "oklch(0.12 0.010 285)",
+              border: "1px solid oklch(0.28 0.012 285)",
+            }}
+          >
+            <div
+              className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, oklch(0.72 0.19 45 / 0.5) 50%, transparent)",
+              }}
+              aria-hidden="true"
+            />
+            <div className="flex flex-col items-center gap-0 mb-2">
+              <span
+                className="font-display font-light tracking-[0.35em] uppercase leading-none"
+                style={{
+                  fontSize: "0.8rem",
+                  color: "oklch(0.65 0 0)",
+                  letterSpacing: "0.4em",
+                }}
+              >
+                H&nbsp;N
+              </span>
+              <span
+                className="font-display font-black leading-none tracking-tight uppercase"
+                style={{
+                  fontSize: "clamp(2.5rem, 12vw, 4.5rem)",
+                  color: "oklch(0.72 0.19 45)",
+                  textShadow: "0 0 40px oklch(0.72 0.19 45 / 0.3)",
+                  lineHeight: 0.9,
+                }}
+              >
+                Coach
+              </span>
+            </div>
+            <p
+              className="font-display text-lg font-black tracking-tight mt-3"
+              style={{ color: "oklch(0.90 0 0)" }}
+            >
+              Almost there!{" "}
+              <span style={{ color: "oklch(0.72 0.19 45)" }}>
+                Tell us about yourself
+              </span>
+            </p>
+            <p
+              className="font-sans text-sm mt-1.5"
+              style={{ color: "oklch(0.58 0 0)" }}
+            >
+              Fill in your details to complete your registration and proceed to
+              payment.
+            </p>
+          </div>
+
           <form
             id="intake-form"
             onSubmit={handleSubmit}
             noValidate
-            className="px-6 pb-6 space-y-4"
+            className="space-y-5"
           >
             {/* Full Name */}
             <FormField label="Full Name" required error={errors.fullName}>
@@ -635,36 +707,32 @@ function IntakeFormModal({
             {/* Invited By */}
             <FormField
               label="Who Invited You?"
-              required
-              error={errors.invitedBy}
+              required={false}
+              error={undefined}
             >
               <Input
                 data-ocid="form.invited_by.input"
                 type="text"
                 placeholder="e.g. +91 98765 43210 (WhatsApp of referrer)"
                 value={form.invitedBy}
-                onChange={(e) =>
-                  !urlRef && handleChange("invitedBy", e.target.value)
-                }
-                readOnly={!!urlRef}
+                onChange={() => {}}
+                readOnly
                 className="form-input"
                 style={{
                   ...inputStyle,
-                  opacity: urlRef ? 0.65 : 1,
-                  cursor: urlRef ? "not-allowed" : "text",
-                  borderColor: errors.invitedBy
-                    ? "oklch(0.65 0.22 25)"
-                    : undefined,
+                  opacity: 0.65,
+                  cursor: "not-allowed",
+                  borderColor: undefined,
                 }}
               />
-              {urlRef && (
-                <p
-                  className="font-sans text-[0.7rem] mt-1"
-                  style={{ color: "oklch(0.55 0 0)" }}
-                >
-                  Referral locked — this field cannot be changed.
-                </p>
-              )}
+              <p
+                className="font-sans text-[0.7rem] mt-1"
+                style={{ color: "oklch(0.55 0 0)" }}
+              >
+                {form.invitedBy
+                  ? "Referral locked — this field cannot be changed."
+                  : "Only set via referral link."}
+              </p>
             </FormField>
 
             {/* Coupon Code */}
@@ -859,51 +927,43 @@ function IntakeFormModal({
               )}
             </div>
           </form>
-        </ScrollArea>
 
-        {/* Footer actions */}
-        <div
-          className="px-6 py-4 flex gap-3"
-          style={{
-            borderTop: "1px solid oklch(0.22 0.008 285)",
-            background: "oklch(0.10 0.008 285)",
-          }}
-        >
-          <button
-            type="button"
-            data-ocid="form.cancel_button"
-            onClick={handleClose}
-            className="flex-none px-5 py-3 rounded-xl font-sans text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
-            style={{
-              background: "oklch(0.18 0.010 285)",
-              border: "1px solid oklch(0.28 0.010 285)",
-              color: "oklch(0.60 0 0)",
-            }}
+          {/* Pay Now button - large, prominent, fully visible in scroll flow */}
+          <div className="mt-8 mb-4">
+            <button
+              type="submit"
+              form="intake-form"
+              data-ocid="form.submit_button"
+              disabled={saving}
+              className="w-full rounded-2xl font-display font-black tracking-[0.12em] uppercase flex items-center justify-center gap-3 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60 disabled:pointer-events-none"
+              style={{
+                background: "oklch(0.72 0.19 45)",
+                color: "oklch(0.10 0 0)",
+                boxShadow: "0 8px 40px oklch(0.72 0.19 45 / 0.5)",
+                fontSize: "1.15rem",
+                paddingTop: "1.25rem",
+                paddingBottom: "1.25rem",
+              }}
+            >
+              {saving ? (
+                <Loader2 size={17} className="animate-spin" />
+              ) : (
+                <CreditCard size={17} />
+              )}
+              {saving ? "Opening Payment..." : "Pay Now"}
+            </button>
+          </div>
+
+          {/* Footer note */}
+          <p
+            className="text-center font-sans text-xs mb-8 mt-2"
+            style={{ color: "oklch(0.45 0 0)" }}
           >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            form="intake-form"
-            data-ocid="form.submit_button"
-            disabled={saving}
-            className="flex-1 py-3 px-5 rounded-xl font-display text-[0.9rem] font-black tracking-[0.1em] uppercase flex items-center justify-center gap-2.5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:opacity-60 disabled:pointer-events-none"
-            style={{
-              background: "oklch(0.72 0.19 45)",
-              color: "oklch(0.10 0 0)",
-              boxShadow: "0 4px 20px oklch(0.72 0.19 45 / 0.4)",
-            }}
-          >
-            {saving ? (
-              <Loader2 size={17} className="animate-spin" />
-            ) : (
-              <CreditCard size={17} />
-            )}
-            {saving ? "Opening Payment..." : "Pay Now"}
-          </button>
+            🔒 Secure payment powered by Razorpay
+          </p>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
 
@@ -3048,6 +3108,253 @@ function TransformationSlideshow() {
 
 /* ─── Pricing Page ───────────────────────────────────────────────────────── */
 
+/* ─── Reviews Slideshow ──────────────────────────────────────────────────── */
+
+const REVIEWS = [
+  {
+    name: "Priya Sharma",
+    location: "Mumbai",
+    goal: "Weight Loss",
+    review:
+      "Lost 8 kg in 40 days! My confidence is back. The personal coach kept me motivated every single day.",
+    stars: 5,
+    result: "8 kg lost",
+  },
+  {
+    name: "Arjun Mehta",
+    location: "Delhi",
+    goal: "Belly Fat Loss",
+    review:
+      "My belly fat is gone! Lost 4 inches in just 60 days. The nutrition classes made a huge difference.",
+    stars: 5,
+    result: "4 inches lost",
+  },
+  {
+    name: "Sneha Patel",
+    location: "Ahmedabad",
+    goal: "Weight Loss",
+    review:
+      "From 78 kg to 68 kg in 60 days. The ideal breakfast plan was so easy to follow. Best decision ever!",
+    stars: 5,
+    result: "10 kg lost",
+  },
+  {
+    name: "Rahul Verma",
+    location: "Bangalore",
+    goal: "Weight Gain",
+    review:
+      "Finally gained 5 kg of muscle in 40 days. Senior coach guidance was amazing. Highly recommend premium!",
+    stars: 5,
+    result: "+5 kg gained",
+  },
+  {
+    name: "Kavita Singh",
+    location: "Jaipur",
+    goal: "Belly Fat Loss",
+    review:
+      "Lost 3 inches around my waist in 20 days. The live exercise classes are super effective.",
+    stars: 5,
+    result: "3 inches lost",
+  },
+  {
+    name: "Deepak Yadav",
+    location: "Hyderabad",
+    goal: "Weight Loss",
+    review:
+      "Down 12 kg in 60 days! Weekly counselling kept me on track. Life-changing transformation plan.",
+    stars: 5,
+    result: "12 kg lost",
+  },
+  {
+    name: "Anita Gupta",
+    location: "Pune",
+    goal: "Increase Energy",
+    review:
+      "My energy levels are through the roof! Also lost 5 kg as a bonus. WhatsApp support is super responsive.",
+    stars: 5,
+    result: "5 kg lost",
+  },
+  {
+    name: "Vikram Joshi",
+    location: "Chennai",
+    goal: "Belly Fat Loss",
+    review:
+      "5 inches off my belly in 60 days! The diet customisation and ideal breakfast routine worked wonders.",
+    stars: 5,
+    result: "5 inches lost",
+  },
+];
+
+function ReviewsSlideshow() {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(
+      () => setCurrent((c) => (c + 1) % REVIEWS.length),
+      4000,
+    );
+    return () => clearInterval(t);
+  }, []);
+
+  const r = REVIEWS[current];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full max-w-lg mx-auto mt-10 mb-2 px-4"
+    >
+      <div className="text-center mb-6">
+        <h2
+          className="font-display text-2xl font-black tracking-tight mb-1"
+          style={{ color: "oklch(0.72 0.19 45)" }}
+        >
+          What Our Members Say
+        </h2>
+        <p className="font-sans text-sm" style={{ color: "oklch(0.55 0 0)" }}>
+          Real results from real people
+        </p>
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current}
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -30 }}
+          transition={{ duration: 0.35 }}
+          className="rounded-2xl p-5 relative overflow-hidden"
+          style={{
+            background: "oklch(0.12 0.010 285)",
+            border: "1px solid oklch(0.28 0.012 285)",
+            boxShadow: "0 8px 32px oklch(0.05 0.008 285 / 0.8)",
+          }}
+        >
+          {/* Top glow */}
+          <div
+            className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, oklch(0.72 0.19 45 / 0.4) 50%, transparent)",
+            }}
+            aria-hidden="true"
+          />
+
+          {/* Stars + result badge */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex gap-0.5">
+              <span
+                className="text-base tracking-wider"
+                style={{ color: "oklch(0.72 0.19 45)" }}
+              >
+                {"★".repeat(r.stars)}
+              </span>
+            </div>
+            <span
+              className="inline-block px-3 py-1 rounded-full font-sans text-xs font-black tracking-wide"
+              style={{
+                background: "oklch(0.72 0.19 45 / 0.15)",
+                border: "1px solid oklch(0.72 0.19 45 / 0.5)",
+                color: "oklch(0.72 0.19 45)",
+              }}
+            >
+              {r.result}
+            </span>
+          </div>
+
+          {/* Review text */}
+          <p
+            className="font-sans text-sm leading-relaxed mb-4"
+            style={{ color: "oklch(0.82 0 0)" }}
+          >
+            "{r.review}"
+          </p>
+
+          {/* Name + location + goal */}
+          <div className="flex items-end justify-between">
+            <div>
+              <p
+                className="font-display font-black text-sm"
+                style={{ color: "oklch(0.90 0 0)" }}
+              >
+                {r.name}
+              </p>
+              <p
+                className="font-sans text-xs mt-0.5"
+                style={{ color: "oklch(0.50 0 0)" }}
+              >
+                {r.location}
+              </p>
+            </div>
+            <span
+              className="inline-block px-2.5 py-1 rounded-lg font-sans text-[0.65rem] font-semibold"
+              style={{
+                background: "oklch(0.18 0.012 285)",
+                border: "1px solid oklch(0.28 0.010 285)",
+                color: "oklch(0.60 0 0)",
+              }}
+            >
+              {r.goal}
+            </span>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Prev / Next + dots */}
+      <div className="flex items-center justify-center gap-4 mt-4">
+        <button
+          type="button"
+          onClick={() =>
+            setCurrent((c) => (c - 1 + REVIEWS.length) % REVIEWS.length)
+          }
+          className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-95"
+          style={{
+            background: "oklch(0.18 0.010 285)",
+            border: "1px solid oklch(0.28 0.010 285)",
+            color: "oklch(0.60 0 0)",
+          }}
+          aria-label="Previous review"
+        >
+          ‹
+        </button>
+        <div className="flex gap-1.5">
+          {REVIEWS.map((rev, i) => (
+            <button
+              key={rev.name}
+              type="button"
+              onClick={() => setCurrent(i)}
+              className="rounded-full transition-all duration-200"
+              style={{
+                width: i === current ? "20px" : "6px",
+                height: "6px",
+                background:
+                  i === current
+                    ? "oklch(0.72 0.19 45)"
+                    : "oklch(0.28 0.010 285)",
+              }}
+              aria-label={`Review ${i + 1}`}
+            />
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setCurrent((c) => (c + 1) % REVIEWS.length)}
+          className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-95"
+          style={{
+            background: "oklch(0.18 0.010 285)",
+            border: "1px solid oklch(0.28 0.010 285)",
+            color: "oklch(0.60 0 0)",
+          }}
+          aria-label="Next review"
+        >
+          ›
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
 function PricingPage({
   onGetStarted,
 }: {
@@ -3133,6 +3440,9 @@ function PricingPage({
 
       {/* Transformation Slideshow */}
       <TransformationSlideshow />
+
+      {/* Reviews Slideshow */}
+      <ReviewsSlideshow />
 
       {/* Toggle */}
       <motion.div
@@ -3253,7 +3563,6 @@ export default function App() {
   };
 
   const [currentView, setCurrentView] = useState<AppView>(getInitialView);
-  const [modalOpen, setModalOpen] = useState(false);
   const [activePlanName, setActivePlanName] = useState("");
   const [activePlanPrice, setActivePlanPrice] = useState(0);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
@@ -3279,7 +3588,7 @@ export default function App() {
   function openModal(planLabel: string, planPrice: number) {
     setActivePlanName(planLabel);
     setActivePlanPrice(planPrice);
-    setModalOpen(true);
+    navigate("form");
   }
 
   useRazorpayScript();
@@ -3343,6 +3652,24 @@ export default function App() {
             className="flex-1 flex flex-col"
           >
             <MembershipTrackingPage onNav={navigate} actor={actor} />
+          </motion.div>
+        )}
+
+        {currentView === "form" && (
+          <motion.div
+            key="form"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 40 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="flex-1 flex flex-col"
+          >
+            <RegistrationFormPage
+              onBack={() => navigate("pricing")}
+              planName={activePlanName}
+              planPrice={activePlanPrice}
+              actor={actor}
+            />
           </motion.div>
         )}
 
@@ -3479,16 +3806,14 @@ export default function App() {
             it to the person who sent you the link.
           </p>
         </div>
+        {/* Watermark */}
+        <p
+          className="mt-2 font-sans text-xs"
+          style={{ color: "oklch(0.55 0 0)" }}
+        >
+          © All Rights Reserved HN Coach
+        </p>
       </footer>
-
-      {/* Intake Form Modal */}
-      <IntakeFormModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        planName={activePlanName}
-        planPrice={activePlanPrice}
-        actor={actor}
-      />
     </div>
   );
 }
